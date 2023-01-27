@@ -12,6 +12,7 @@ class ProductManager {
       "code",
       "stock",
     ];
+
     for (const field of requiredFields) {
       if (!product[field]) throw new Error(`El campo "${field}" es requerido`);
     }
@@ -22,18 +23,8 @@ class ProductManager {
     const validateFieldsString = ["title", "description", "thumbnail", "code"];
 
     for (const field of validateFieldsNumber) {
-      if (typeof product[field] !== "number") {
+      if (typeof product[field] !== "number")
         throw new Error(`El campo "${field}" deber ser de tipo number`);
-      }
-    }
-    if (product.price < 0) {
-      throw new Error(`El campo "price" no puede ser un numero negativo`);
-    }
-
-    if (product.stock < 0 || product.stock % 1 !== 0) {
-      throw new Error(
-        `El campo "stock" deber ser un número entero o no puede ser un numero negativo`
-      );
     }
 
     for (const field of validateFieldsString) {
@@ -42,7 +33,17 @@ class ProductManager {
     }
   }
 
-  validateExist(product) {
+  validateOther(product) {
+    if (product.price < 0)
+      throw new Error(`El campo "price" no puede ser un numero negativo`);
+
+    if (product.stock < 0 || product.stock % 1 !== 0)
+      throw new Error(
+        `El campo "stock" deber ser un número entero o no puede ser un numero negativo`
+      );
+  }
+
+  validateExistCode(product) {
     const codeExists = this.products.some((prod) => prod.code === product.code);
     if (codeExists)
       throw new Error(
@@ -57,8 +58,9 @@ class ProductManager {
       // validacion de los campos y tipos
       this.validateFields(product);
       this.validateType(product);
+      this.validateOther(product);
       // validacion si existe el codigo en la lista
-      this.validateExist(product);
+      this.validateExistCode(product);
     } catch (error) {
       console.log(error.message);
       return;
@@ -77,10 +79,13 @@ class ProductManager {
     });
   };
 
-  updateProduct(id, updates) {
+  updateProduct(id, { title, description, price, thumbnail, code, stock }) {
+    const update = { title, description, price, thumbnail, code, stock };
+
     const productIndex = this.products.findIndex(
       (product) => product.id === id
     );
+
     if (productIndex === -1) {
       console.log("El producto no pudo ser actualizado");
       return;
@@ -88,8 +93,9 @@ class ProductManager {
 
     try {
       // validacion de los campos y tipos
-      this.validateFields(updates);
-      this.validateType(updates);
+      this.validateFields(update);
+      this.validateType(update);
+      this.validateOther(update);
     } catch (error) {
       console.log(error.message);
       return;
@@ -97,9 +103,8 @@ class ProductManager {
 
     this.products[productIndex] = {
       ...this.products[productIndex],
-      ...updates,
+      ...update,
     };
-    console.log("Producto actualizado");
   }
 
   getProducts = () => this.products;
@@ -107,7 +112,6 @@ class ProductManager {
   getProductById = (id) => {
     const product = this.products.find((product) => product.id === id);
     if (!product) return "Not Found!";
-
     return product;
   };
 }
@@ -138,17 +142,25 @@ product.addProduct({
   stock: 99,
 });
 
-// lista de productos agregados mediante el metodo addProduct ,
-// si existe un error en el llenado de productos se muestra en consola
+/* 
+  lista de productos agregados mediante el metodo addProduct ,
+  si existe un error en el llenado de productos se muestra en consola
+*/
+console.log(`Listado de Productos:`);
 console.log(product.getProducts());
-console.log(`--------------------`);
+console.log(`=============================================`);
 
 // productos obtenidos con el id , si no existe devuelve un Not Found!
-console.log(`Productos obtenidos con el ID:`);
+console.log(`Productos obtenidos según el ID:`);
 console.log(product.getProductById(1));
 console.log(product.getProductById(5));
-console.log(`--------------------`);
-// actualizacion del producto segun su id, si no encuentra devuelve un mensaje de error
+console.log(`=============================================`);
+
+/*
+  actualizacion del producto segun su id, si no encuentra devuelve o existe un error,
+  devuelve un mensaje de error
+*/
+console.log(`Productos después de la actualización:`);
 product.updateProduct(1, {
   title: "producto modificado",
   description: "example description",
@@ -158,5 +170,4 @@ product.updateProduct(1, {
   stock: 19,
 });
 
-console.log(`Productos obtenidos despues de la actualización`);
 console.log(product.getProducts());

@@ -51,7 +51,7 @@ class ProductManager {
       );
   }
 
-  addProduct = ({ title, description, price, thumbnail, code, stock }) => {
+  addProduct({ title, description, price, thumbnail, code, stock }) {
     const product = { title, description, price, thumbnail, code, stock };
 
     try {
@@ -77,7 +77,7 @@ class ProductManager {
       id,
       ...product,
     });
-  };
+  }
 
   updateProduct(id, { title, description, price, thumbnail, code, stock }) {
     const update = { title, description, price, thumbnail, code, stock };
@@ -107,13 +107,15 @@ class ProductManager {
     };
   }
 
-  getProducts = () => this.products;
+  getProducts() {
+    return this.products;
+  }
 
-  getProductById = (id) => {
+  getProductById(id) {
     const product = this.products.find((product) => product.id === id);
     if (!product) return "Not Found!";
     return product;
-  };
+  }
 }
 
 /*
